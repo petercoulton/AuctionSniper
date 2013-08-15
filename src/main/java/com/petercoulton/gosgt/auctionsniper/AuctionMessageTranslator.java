@@ -1,0 +1,19 @@
+package com.petercoulton.gosgt.auctionsniper;
+
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.packet.Message;
+
+public class AuctionMessageTranslator implements MessageListener {
+
+    private final IAuctionEventListener listener;
+
+    public AuctionMessageTranslator(IAuctionEventListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public void processMessage(Chat chat, Message message) {
+        listener.auctionClosed();
+    }
+}

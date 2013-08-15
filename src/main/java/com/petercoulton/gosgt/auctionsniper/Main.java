@@ -1,10 +1,8 @@
 package com.petercoulton.gosgt.auctionsniper;
 
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Message;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -13,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static java.lang.String.format;
 
-public class Main {
+public class Main implements IAuctionEventListener {
     private static final int ARG_HOSTNAME = 0;
     private static final int ARG_USERNAME = 1;
     private static final int ARG_PASSWORD = 2;
@@ -35,26 +33,18 @@ public class Main {
 
     public static void main(String... args) throws InvocationTargetException, InterruptedException, XMPPException {
         Main main = new Main();
+        String userID = args[ARG_USERNAME];
         main.joinAuction(
-                connectTo(args[ARG_HOSTNAME], args[ARG_USERNAME], args[ARG_PASSWORD]),
+                connectTo(args[ARG_HOSTNAME], userID, args[ARG_PASSWORD]),
                 args[ARG_ITEM_ID]);
     }
 
     private void joinAuction(final XMPPConnection connection, String itemID) throws XMPPException {
+
         disconnectWhenUICloses(connection);
+
         Chat chat = connection.getChatManager().createChat(
-                auctionID(itemID, connection),
-                new MessageListener() {
-                    @Override
-                    public void processMessage(Chat chat, Message message) {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                ui.showStatus(MainWindow.STATUS_LOST);
-                            }
-                        });
-                    }
-                });
+                auctionID(itemID, connection), new AuctionMessageTranslator(this));
 
         this.notToBeGCd = chat;
 
@@ -86,6 +76,16 @@ public class Main {
             @Override
             public void run() {
                 ui = new MainWindow();
+            }
+        });
+    }
+
+    @Override
+    public void auctionClosed() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                ui.showStatus(MainWindow.STATUS_LOST);
             }
         });
     }
