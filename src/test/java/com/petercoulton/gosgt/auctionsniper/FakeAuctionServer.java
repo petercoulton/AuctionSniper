@@ -12,13 +12,13 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FakeAuctionServer {
-    public static final String AUCTION_RESOURCE = "Auction";
-    public static final String AUCTION_LOGIN_FORMAT = "auction-%s";
-    public static final String AUCTION_PASSWORD = "auction";
-
     public static final String XMPP_HOSTNAME = "localhost";
 
-    private final MessageListener messageListener = new SingleMessageListener();
+    public static final String AUCTION_LOGIN_FORMAT = "auction-%s";
+    public static final String AUCTION_PASSWORD = "auction";
+    public static final String AUCTION_RESOURCE = "Auction";
+
+    private final SingleMessageListener messageListener = new SingleMessageListener();
 
     private final String itemID;
     private final XMPPConnection connection;
@@ -35,7 +35,7 @@ public class FakeAuctionServer {
         connection.getChatManager().addChatListener(
                 new ChatManagerListener() {
                     @Override
-                    public void chatCreated(Chat chat, boolean b) {
+                    public void chatCreated(Chat chat, boolean createdLocally) {
                         currentChat = chat;
                         currentChat.addMessageListener(messageListener);
                     }
@@ -47,7 +47,8 @@ public class FakeAuctionServer {
         return itemID;
     }
 
-    public void hasReceivedJoinRequestFromSniper() {
+    public void hasReceivedJoinRequestFromSniper() throws InterruptedException {
+        messageListener.receivesAMessage();
     }
 
     public void announceClosed() throws XMPPException {
@@ -67,7 +68,7 @@ public class FakeAuctionServer {
         }
 
         public void receivesAMessage() throws InterruptedException {
-            assertThat("Message", messages.poll(5, SECONDS), is(notNullValue()));
+            assertThat("Message", messages.poll(10, SECONDS), is(notNullValue()));
         }
     }
 }
