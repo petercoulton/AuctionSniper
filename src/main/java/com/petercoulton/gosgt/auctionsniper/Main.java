@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static java.lang.String.format;
 
-public class Main implements ISniperListener {
+public class Main {
     private static final int ARG_HOSTNAME = 0;
     private static final int ARG_USERNAME = 1;
     private static final int ARG_PASSWORD = 2;
@@ -23,9 +23,9 @@ public class Main implements ISniperListener {
     public static final String BID_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: BID; Price: %d;";
     public static final String JOIN_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: JOIN";
 
-
-
     public MainWindow ui;
+
+    @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private Chat notToBeGCd;
 
     public Main() throws InvocationTargetException, InterruptedException {
@@ -47,7 +47,8 @@ public class Main implements ISniperListener {
         this.notToBeGCd = chat;
 
         Auction auction = new XMPPAuction(chat);
-        chat.addMessageListener(new AuctionMessageTranslator(new AuctionSniper(auction, this)));
+
+        chat.addMessageListener(new AuctionMessageTranslator(new AuctionSniper(auction, new SniperStatusDisplayer())));
 
         auction.join();
     }
@@ -81,23 +82,24 @@ public class Main implements ISniperListener {
         });
     }
 
-    @Override
-    public void sniperLost() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                ui.showStatus(MainWindow.STATUS_LOST);
-            }
-        });
-    }
+    public class SniperStatusDisplayer implements ISniperListener {
+        @Override
+        public void sniperBidding() {
+            showStatus(MainWindow.STATUS_BIDDING);
+        }
 
-    @Override
-    public void sniperBidding() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                ui.showStatus(MainWindow.STATUS_BIDDING);
-            }
-        });
+        @Override
+        public void sniperLost() {
+            showStatus(MainWindow.STATUS_LOST);
+        }
+
+        private void showStatus(final String status) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ui.showStatus(status);
+                }
+            });
+        }
     }
 }

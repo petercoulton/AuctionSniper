@@ -1,10 +1,7 @@
 package com.petercoulton.gosgt.auctionsniper;
 
 
-public class Auction {
-    public void bid(int amount) {
-    }
-
-    void join() {
-    }
+public abstract class Auction {
+    public abstract void bid(int amount);
+    public abstract void join();
 }
