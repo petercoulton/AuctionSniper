@@ -39,4 +39,12 @@ public class ApplicationRunner {
             driver.dispose();
         }
     }
+
+    public void hasShownSniperIsWinning() {
+        driver.showsSniperStatus(MainWindow.STATUS_WINNING);
+    }
+
+    public void showsSniperHasWonAuction() {
+        driver.showsSniperStatus(MainWindow.STATUS_WON);
+    }
 }
