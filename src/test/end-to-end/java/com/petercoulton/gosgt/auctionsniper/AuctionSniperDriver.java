@@ -2,10 +2,10 @@ package com.petercoulton.gosgt.auctionsniper;
 
 import com.objogate.wl.swing.AWTEventQueueProber;
 import com.objogate.wl.swing.driver.JFrameDriver;
-import com.objogate.wl.swing.driver.JLabelDriver;
+import com.objogate.wl.swing.driver.JTableDriver;
 import com.objogate.wl.swing.gesture.GesturePerformer;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static com.objogate.wl.swing.matcher.JLabelTextMatcher.withLabelText;
 
 public class AuctionSniperDriver extends JFrameDriver {
 
@@ -19,6 +19,6 @@ public class AuctionSniperDriver extends JFrameDriver {
     }
 
     public void showsSniperStatus(String expectedStatus) {
-        new JLabelDriver(this, named(MainWindow.SNIPER_STATUS_NAME)).hasText(equalTo(expectedStatus));
+        new JTableDriver(this).hasCell(withLabelText(expectedStatus));
     }
 }

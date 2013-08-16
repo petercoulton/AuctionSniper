@@ -34,17 +34,17 @@ public class ApplicationRunner {
         driver.showsSniperStatus(MainWindow.STATUS_BIDDING);
     }
 
-    public void stop() {
-        if (driver != null) {
-            driver.dispose();
-        }
-    }
-
     public void hasShownSniperIsWinning() {
         driver.showsSniperStatus(MainWindow.STATUS_WINNING);
     }
 
     public void showsSniperHasWonAuction() {
         driver.showsSniperStatus(MainWindow.STATUS_WON);
+    }
+
+    public void stop() {
+        if (driver != null) {
+            driver.dispose();
+        }
     }
 }
