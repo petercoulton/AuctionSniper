@@ -1,12 +1,12 @@
 package com.petercoulton.gosgt.auctionsniper;
 
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Message;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 
 import static java.lang.String.format;
@@ -20,7 +20,12 @@ public class Main {
     public static final String AUCTION_RESOURCE = "Auction";
     public static final String ACTION_ID_FORMAT = "auction-%s@%s/" + AUCTION_RESOURCE;
 
+    public static final String BID_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: BID; Price: %d;";
+    public static final String JOIN_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: JOIN";
+
     public MainWindow ui;
+
+    @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private Chat notToBeGCd;
 
     public Main() throws InvocationTargetException, InterruptedException {
@@ -29,29 +34,32 @@ public class Main {
 
     public static void main(String... args) throws InvocationTargetException, InterruptedException, XMPPException {
         Main main = new Main();
+        String userID = args[ARG_USERNAME];
         main.joinAuction(
-                connectTo(args[ARG_HOSTNAME], args[ARG_USERNAME], args[ARG_PASSWORD]),
+                connectTo(args[ARG_HOSTNAME], userID, args[ARG_PASSWORD]),
                 args[ARG_ITEM_ID]);
     }
 
-    private void joinAuction(XMPPConnection connection, String itemID) throws XMPPException {
-        Chat chat = connection.getChatManager().createChat(
-                auctionID(itemID, connection),
-                new MessageListener() {
-                    @Override
-                    public void processMessage(Chat chat, Message message) {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                ui.showStatus(MainWindow.STATUS_LOST);
-                            }
-                        });
-                    }
-                });
+    private void joinAuction(final XMPPConnection connection, String itemID) throws XMPPException {
+        disconnectWhenUICloses(connection);
 
+        final Chat chat = connection.getChatManager().createChat(auctionID(itemID, connection), null);
         this.notToBeGCd = chat;
 
-        chat.sendMessage(new Message());
+        Auction auction = new XMPPAuction(chat);
+
+        chat.addMessageListener(new AuctionMessageTranslator(new AuctionSniper(auction, new SniperStatusDisplayer())));
+
+        auction.join();
+    }
+
+    private void disconnectWhenUICloses(final XMPPConnection connection) {
+        ui.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                connection.disconnect();
+            }
+        });
     }
 
     private static String auctionID(String itemID, XMPPConnection connection) {
@@ -72,5 +80,26 @@ public class Main {
                 ui = new MainWindow();
             }
         });
+    }
+
+    public class SniperStatusDisplayer implements ISniperListener {
+        @Override
+        public void sniperBidding() {
+            showStatus(MainWindow.STATUS_BIDDING);
+        }
+
+        @Override
+        public void sniperLost() {
+            showStatus(MainWindow.STATUS_LOST);
+        }
+
+        private void showStatus(final String status) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ui.showStatus(status);
+                }
+            });
+        }
     }
 }
