@@ -19,6 +19,7 @@ public class Main {
 
     public static final String AUCTION_RESOURCE = "Auction";
     public static final String ACTION_ID_FORMAT = "auction-%s@%s/" + AUCTION_RESOURCE;
+    public static final String SNIPER_ID = "sniper";
 
     public static final String BID_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: BID; Price: %d;";
     public static final String JOIN_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: JOIN";
@@ -48,7 +49,9 @@ public class Main {
 
         Auction auction = new XMPPAuction(chat);
 
-        chat.addMessageListener(new AuctionMessageTranslator(new AuctionSniper(auction, new SniperStatusDisplayer())));
+        chat.addMessageListener(new AuctionMessageTranslator(
+                connection.getUser(),
+                new AuctionSniper(auction, new SniperStatusDisplayer())));
 
         auction.join();
     }
@@ -86,6 +89,16 @@ public class Main {
         @Override
         public void sniperBidding() {
             showStatus(MainWindow.STATUS_BIDDING);
+        }
+
+        @Override
+        public void sniperWinning() {
+            showStatus(MainWindow.STATUS_WINNING);
+        }
+
+        @Override
+        public void sniperWon() {
+            showStatus(MainWindow.STATUS_WON);
         }
 
         @Override
