@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static java.lang.String.format;
 
-public class Main implements IAuctionEventListener {
+public class Main implements ISniperListener {
     private static final int ARG_HOSTNAME = 0;
     private static final int ARG_USERNAME = 1;
     private static final int ARG_PASSWORD = 2;
@@ -44,7 +44,7 @@ public class Main implements IAuctionEventListener {
         disconnectWhenUICloses(connection);
 
         Chat chat = connection.getChatManager().createChat(
-                auctionID(itemID, connection), new AuctionMessageTranslator(this));
+                auctionID(itemID, connection), new AuctionMessageTranslator(new AuctionSniper(this)));
 
         this.notToBeGCd = chat;
 
@@ -81,7 +81,7 @@ public class Main implements IAuctionEventListener {
     }
 
     @Override
-    public void auctionClosed() {
+    public void sniperLost() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
