@@ -5,6 +5,7 @@ import static com.petercoulton.gosgt.auctionsniper.FakeAuctionServer.XMPP_HOSTNA
 public class ApplicationRunner {
     public static final String SNIPER_USERNAME = "sniper";
     public static final String SNIPER_PASSWORD = "sniper";
+    public static final String SNIPER_XMPP_ID = SNIPER_USERNAME + "@" + XMPP_HOSTNAME + "/Auction";;
 
     AuctionSniperDriver driver;
 
@@ -27,6 +28,10 @@ public class ApplicationRunner {
 
     public void showsSniperHasLostAuction() {
         driver.showsSniperStatus(MainWindow.STATUS_LOST);
+    }
+
+    public void hasShownSniperItBidding() {
+        driver.showsSniperStatus(MainWindow.STATUS_BIDDING);
     }
 
     public void stop() {

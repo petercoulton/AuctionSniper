@@ -1,5 +1,6 @@
 package com.petercoulton.gosgt.auctionsniper;
 
+import org.hamcrest.Matcher;
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.packet.Message;
 
@@ -7,6 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,19 +49,34 @@ public class FakeAuctionServer {
         return itemID;
     }
 
-    public void hasReceivedJoinRequestFromSniper() throws InterruptedException {
-        messageListener.receivesAMessage();
+    public void hasReceivedJoinRequestFrom(String bidder) throws InterruptedException {
+        messageListener.receivesAMessage(equalTo(format(Main.JOIN_COMMAND_FORMAT, bidder)));
     }
 
     public void announceClosed() throws XMPPException {
-        currentChat.sendMessage(new Message());
+        currentChat.sendMessage("SOLVersion: 1.1; Event: CLOSE;");
     }
 
     public void stop() {
         connection.disconnect();
     }
 
+    public void reportPrice(int price, int increment, String bidder) throws XMPPException {
+        currentChat.sendMessage(
+                format("SOLVersion: 1.1; Event: PRICE; " +
+                        "CurrentPrice: %d; Increment: %d; Bidder: %s",
+                        price, increment, bidder));
+    }
+
+    public void hasReceivedBid(int bid, String bidder) throws InterruptedException {
+        assertThat(currentChat.getParticipant(), equalTo(bidder));
+        messageListener.receivesAMessage(
+                equalTo(format(Main.BID_COMMAND_FORMAT, bid, bidder)));
+    }
+
+
     public class SingleMessageListener implements MessageListener {
+        public static final int TIMEOUT = 5;
         private final ArrayBlockingQueue<Message> messages = new ArrayBlockingQueue<>(1);
 
         @Override
@@ -68,7 +85,13 @@ public class FakeAuctionServer {
         }
 
         public void receivesAMessage() throws InterruptedException {
-            assertThat("Message", messages.poll(10, SECONDS), is(notNullValue()));
+            assertThat("Message", messages.poll(TIMEOUT, SECONDS), is(notNullValue()));
+        }
+
+        public void receivesAMessage(Matcher<? super String> messageMatcher) throws InterruptedException {
+            final Message message = messages.poll(TIMEOUT, SECONDS);
+            assertThat("Message", message, is(notNullValue()));
+            assertThat("Message", message.getBody(), messageMatcher);
         }
     }
 }
