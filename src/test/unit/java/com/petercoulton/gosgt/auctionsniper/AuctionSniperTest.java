@@ -1,19 +1,30 @@
 package com.petercoulton.gosgt.auctionsniper;
 
 
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class AuctionSniperTest {
+
+    @Mock private ISniperListener listener;
+    @Mock private Auction auction;
+
+    private AuctionSniper sniper;
+
+    @Before
+    public void setUp() throws Exception {
+        sniper = new AuctionSniper(auction, listener);
+    }
+
     @Test public void
     should_report_that_it_lost_when_an_auction_closes() throws Exception {
         // Arrange
-        ISniperListener listener = mock(ISniperListener.class);
-        Auction UNUSED_AUCTION = mock(Auction.class);
-        AuctionSniper sniper = new AuctionSniper(UNUSED_AUCTION, listener);
-
         // Act
         sniper.auctionClosed();
 
@@ -27,10 +38,6 @@ public class AuctionSniperTest {
         // Arrange
         final int price = 1001;
         final int increment = 25;
-
-        ISniperListener listener = mock(ISniperListener.class);
-        Auction auction = mock(Auction.class);
-        AuctionSniper sniper = new AuctionSniper(auction, listener);
 
         // Act
         sniper.currentPrice(price, increment);
