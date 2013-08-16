@@ -2,9 +2,11 @@ package com.petercoulton.gosgt.auctionsniper;
 
 
 public class AuctionSniper implements IAuctionEventListener {
+    private final Auction auction;
     private final ISniperListener listener;
 
-    public AuctionSniper(ISniperListener listener) {
+    public AuctionSniper(Auction auction, ISniperListener listener) {
+        this.auction = auction;
         this.listener = listener;
     }
 
@@ -15,5 +17,7 @@ public class AuctionSniper implements IAuctionEventListener {
 
     @Override
     public void currentPrice(int price, int increment) {
+        listener.sniperBidding();
+        auction.bid(price + increment);
     }
 }

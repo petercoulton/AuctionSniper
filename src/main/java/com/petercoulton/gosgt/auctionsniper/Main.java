@@ -20,8 +20,9 @@ public class Main implements ISniperListener {
     public static final String AUCTION_RESOURCE = "Auction";
     public static final String ACTION_ID_FORMAT = "auction-%s@%s/" + AUCTION_RESOURCE;
 
-    public static final String BID_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: BID; Price: %d; Bidder: %s";
+    public static final String BID_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: BID; Price: %d;";
     public static final String JOIN_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: JOIN";
+
 
 
     public MainWindow ui;
@@ -40,14 +41,22 @@ public class Main implements ISniperListener {
     }
 
     private void joinAuction(final XMPPConnection connection, String itemID) throws XMPPException {
-
         disconnectWhenUICloses(connection);
 
-        Chat chat = connection.getChatManager().createChat(
-                auctionID(itemID, connection), new AuctionMessageTranslator(new AuctionSniper(this)));
-
+        final Chat chat = connection.getChatManager().createChat(auctionID(itemID, connection), null);
         this.notToBeGCd = chat;
 
+        Auction auction = new Auction() {
+            public void bid(int amount) {
+                try {
+                    chat.sendMessage(String.format(BID_COMMAND_FORMAT, amount));
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        chat.addMessageListener(new AuctionMessageTranslator(new AuctionSniper(auction, this)));
         chat.sendMessage(JOIN_COMMAND_FORMAT);
     }
 
@@ -86,6 +95,16 @@ public class Main implements ISniperListener {
             @Override
             public void run() {
                 ui.showStatus(MainWindow.STATUS_LOST);
+            }
+        });
+    }
+
+    @Override
+    public void sniperBidding() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                ui.showStatus(MainWindow.STATUS_BIDDING);
             }
         });
     }
