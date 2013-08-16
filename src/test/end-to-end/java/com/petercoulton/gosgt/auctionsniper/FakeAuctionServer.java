@@ -50,7 +50,7 @@ public class FakeAuctionServer {
     }
 
     public void hasReceivedJoinRequestFrom(String bidder) throws InterruptedException {
-        messageListener.receivesAMessage(equalTo(format(Main.JOIN_COMMAND_FORMAT, bidder)));
+        messageListener.receivesAMessage(equalTo(Main.JOIN_COMMAND_FORMAT));
     }
 
     public void announceClosed() throws XMPPException {
@@ -82,10 +82,6 @@ public class FakeAuctionServer {
         @Override
         public void processMessage(Chat chat, Message message) {
             messages.add(message);
-        }
-
-        public void receivesAMessage() throws InterruptedException {
-            assertThat("Message", messages.poll(TIMEOUT, SECONDS), is(notNullValue()));
         }
 
         public void receivesAMessage(Matcher<? super String> messageMatcher) throws InterruptedException {
