@@ -3,7 +3,7 @@ package com.petercoulton.gosgt.auctionsniper;
 
 import org.jivesoftware.smack.*;
 
-public class XMPPAuction extends Auction {
+public class XMPPAuction implements Auction {
 
     private final Chat chat;
 

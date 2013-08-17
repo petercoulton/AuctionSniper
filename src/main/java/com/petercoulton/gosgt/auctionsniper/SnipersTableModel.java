@@ -3,16 +3,25 @@ package com.petercoulton.gosgt.auctionsniper;
 import javax.swing.table.AbstractTableModel;
 
 public class SnipersTableModel extends AbstractTableModel {
-    private static final SniperState STARTING_UP = new SniperState("", 0, 0);
-    private String statusText = MainWindow.STATUS_JOINING;
-    private SniperState sniperState = STARTING_UP;
+    private static final SniperSnapshot STARTING_UP = new SniperSnapshot("", 0, 0, SniperState.JOINING);
+    private String state = MainWindow.STATUS_JOINING;
+    private SniperSnapshot snapshot = STARTING_UP;
+
+    private static String[] STATUS_TEXT = {
+            "Joining", "Bidding", "Winning", "Lost", "Won"
+    };
 
     public enum Column {
-        ITEM_IDENTIFIER, LAST_PRICE, LAST_BID, SNIPER_STATUS;
+        ITEM_IDENTIFIER,
+        LAST_PRICE,
+        LAST_BID,
+        SNIPER_STATUS;
 
         public static Column at(int offset) {
             return values()[offset];
         }
+
+
     }
 
     @Override
@@ -29,26 +38,24 @@ public class SnipersTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (Column.at(columnIndex)) {
             case ITEM_IDENTIFIER:
-                return sniperState.getItemID();
+                return snapshot.itemID;
             case LAST_PRICE:
-                return sniperState.getPrice();
+                return snapshot.price;
             case LAST_BID:
-                return sniperState.getBid();
+                return snapshot.bid;
             case SNIPER_STATUS:
-                return statusText;
+                return textFor(snapshot.state);
+            default:
+                throw new IllegalArgumentException("No column at " + columnIndex);
         }
-
-        return statusText;
     }
 
-    public void sniperStatusChanged(SniperState state, String statusText) {
-        sniperState = state;
-        this.statusText = statusText;
-        fireTableRowsUpdated(0, 0);
+    private String textFor(SniperState state) {
+        return STATUS_TEXT[state.ordinal()];
     }
 
-    public void setStatusText(String status) {
-        statusText = status;
+    public void sniperStatusChanged(SniperSnapshot snapshot) {
+        this.snapshot = snapshot;
         fireTableRowsUpdated(0, 0);
     }
 }

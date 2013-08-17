@@ -19,7 +19,7 @@ public class SnipersTableModelTest {
         final SnipersTableModel model = new SnipersTableModel();
 
         // Act
-        model.sniperStatusChanged(new SniperState("item-12345", 132, 12), MainWindow.STATUS_BIDDING);
+        model.sniperStatusChanged(new SniperSnapshot("item-12345", 132, 12, SniperState.BIDDING));
 
         // Assert
         assertThat(model.getValueAt(0, Column.ITEM_IDENTIFIER.ordinal()), is((Object)"item-12345"));

@@ -1,37 +1,45 @@
 package com.petercoulton.gosgt.auctionsniper;
 
 
-public class AuctionSniper implements IAuctionEventListener {
+public class AuctionSniper implements AuctionEventListener {
+
     private boolean isWinning = false;
 
     private final String itemID;
     private final Auction auction;
-    private final ISniperListener listener;
+    private final SniperListener listener;
 
-    public AuctionSniper(String itemID, Auction auction, ISniperListener listener) {
+    private SniperSnapshot snapshot;
+
+    public AuctionSniper(String itemID, Auction auction, SniperListener listener) {
         this.itemID = itemID;
         this.auction = auction;
         this.listener = listener;
+        this.snapshot = SniperSnapshot.joining(itemID);
     }
 
     @Override
     public void auctionClosed() {
-        if (isWinning) {
-            listener.sniperWon();
-        } else {
-            listener.sniperLost();
-        }
+        snapshot = snapshot.closed();
+        notifyChange();
     }
 
     @Override
     public void currentPrice(int price, int increment, PriceSource priceSource) {
-        isWinning = priceSource == PriceSource.FromSniper;
-        if (isWinning) {
-            listener.sniperWinning();
-        } else {
-            final int bid = price + increment;
-            auction.bid(bid);
-            listener.sniperBidding(new SniperState(itemID, price, bid));
+        switch (priceSource) {
+            case FromSniper:
+                snapshot = snapshot.winning(price);
+                break;
+            case FromOtherBidder:
+                final int bid = price + increment;
+                auction.bid(bid);
+                snapshot = snapshot.bidding(price, bid);
+                break;
         }
+        notifyChange();
+    }
+
+    private void notifyChange() {
+        listener.sniperStateChanged(snapshot);
     }
 }

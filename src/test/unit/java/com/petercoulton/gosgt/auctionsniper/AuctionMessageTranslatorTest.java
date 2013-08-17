@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static com.petercoulton.gosgt.auctionsniper.IAuctionEventListener.PriceSource;
+import static com.petercoulton.gosgt.auctionsniper.AuctionEventListener.PriceSource;
 import static java.lang.String.format;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
@@ -18,7 +18,7 @@ public class AuctionMessageTranslatorTest {
 
     public static final Chat UNUSED_CHAT = null;
 
-    @Mock private IAuctionEventListener listener;
+    @Mock private AuctionEventListener listener;
 
     private AuctionMessageTranslator translator;
 
