@@ -4,10 +4,12 @@ package com.petercoulton.gosgt.auctionsniper;
 public class AuctionSniper implements IAuctionEventListener {
     private boolean isWinning = false;
 
+    private final String itemID;
     private final Auction auction;
     private final ISniperListener listener;
 
-    public AuctionSniper(Auction auction, ISniperListener listener) {
+    public AuctionSniper(String itemID, Auction auction, ISniperListener listener) {
+        this.itemID = itemID;
         this.auction = auction;
         this.listener = listener;
     }
@@ -27,8 +29,9 @@ public class AuctionSniper implements IAuctionEventListener {
         if (isWinning) {
             listener.sniperWinning();
         } else {
-            listener.sniperBidding();
-            auction.bid(price + increment);
+            final int bid = price + increment;
+            auction.bid(bid);
+            listener.sniperBidding(new SniperState(itemID, price, bid));
         }
     }
 }

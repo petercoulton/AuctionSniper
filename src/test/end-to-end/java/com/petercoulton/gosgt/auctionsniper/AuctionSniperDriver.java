@@ -5,6 +5,7 @@ import com.objogate.wl.swing.driver.JFrameDriver;
 import com.objogate.wl.swing.driver.JTableDriver;
 import com.objogate.wl.swing.gesture.GesturePerformer;
 
+import static com.objogate.wl.swing.matcher.IterableComponentsMatcher.matching;
 import static com.objogate.wl.swing.matcher.JLabelTextMatcher.withLabelText;
 
 public class AuctionSniperDriver extends JFrameDriver {
@@ -18,7 +19,15 @@ public class AuctionSniperDriver extends JFrameDriver {
         );
     }
 
-    public void showsSniperStatus(String expectedStatus) {
-        new JTableDriver(this).hasCell(withLabelText(expectedStatus));
+    public void showsSniperStatus(String status) {
+        new JTableDriver(this).hasCell(withLabelText(status));
+    }
+
+    public void showsSniperStatus(String itemID, int lastPrice, int lastBid, String status) {
+        final JTableDriver table = new JTableDriver(this);
+        table.hasRow(
+                matching(withLabelText(itemID), withLabelText(String.valueOf(lastPrice)),
+                        withLabelText(String.valueOf(lastBid)), withLabelText(status))
+        );
     }
 }

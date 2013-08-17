@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class AuctionSniperTest {
 
+    public static final String ITEM_ID = "item-54321";
     @Mock private ISniperListener listener;
     @Mock private Auction auction;
 
@@ -20,7 +21,7 @@ public class AuctionSniperTest {
 
     @Before
     public void setUp() throws Exception {
-        sniper = new AuctionSniper(auction, listener);
+        sniper = new AuctionSniper(ITEM_ID, auction, listener);
     }
 
     @Test public void
@@ -38,14 +39,15 @@ public class AuctionSniperTest {
         // Arrange
         final int price = 1001;
         final int increment = 25;
+        final int bid = price + increment;
 
         // Act
         sniper.currentPrice(price, increment, PriceSource.FromOtherBidder);
         sniper.auctionClosed();
 
         // Assert
-        verify(auction).bid(price + increment);
-        verify(listener).sniperBidding();
+        verify(auction).bid(bid);
+        verify(listener).sniperBidding(new SniperState(ITEM_ID, price, bid));
         verify(listener).sniperLost();
     }
 
@@ -54,13 +56,14 @@ public class AuctionSniperTest {
         // Arrange
         final int price = 1001;
         final int increment = 25;
+        final int bid = price + increment;
 
         // Act
         sniper.currentPrice(price, increment, PriceSource.FromOtherBidder);
 
         // Assert
-        verify(auction).bid(price + increment);
-        verify(listener).sniperBidding();
+        verify(auction).bid(bid);
+        verify(listener).sniperBidding(new SniperState(ITEM_ID, price, bid));
     }
 
     @Test public void
