@@ -1,7 +1,7 @@
 package com.petercoulton.gosgt.auctionsniper;
 
 
-public abstract class Auction {
-    public abstract void bid(int amount);
-    public abstract void join();
+public interface Auction {
+    void bid(int amount);
+    void join();
 }

@@ -1,6 +1,6 @@
 package com.petercoulton.gosgt.auctionsniper;
 
-public interface IAuctionEventListener {
+public interface AuctionEventListener {
     enum PriceSource {
         FromSniper, FromOtherBidder
     }

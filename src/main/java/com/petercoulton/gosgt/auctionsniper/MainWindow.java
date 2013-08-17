@@ -1,7 +1,6 @@
 package com.petercoulton.gosgt.auctionsniper;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class MainWindow extends JFrame {
@@ -11,30 +10,36 @@ public class MainWindow extends JFrame {
     public static final String STATUS_WINNING = "Winning";
     public static final String STATUS_WON     = "Won";
 
-    public static final String MAIN_WINDOW_TITLE = "Auction Sniper";
+    public static final String APPLICATION_TITLE = "Auction Sniper";
     public static final String MAIN_WINDOW_NAME = "Auction Sniper";
 
-    public static final String SNIPER_STATUS_NAME = "Sniper Status";
+    public static final String SNIPERS_TABLE_NAME = "Sniper Status";
 
-    private final JLabel sniperStatus = createLabel(STATUS_JOINING);
+    private SnipersTableModel snipers;
 
     public MainWindow() {
-        super(MAIN_WINDOW_TITLE);
+        super(APPLICATION_TITLE);
         setName(MAIN_WINDOW_NAME);
-        add(sniperStatus);
+        fillContentPane(makeSnipersTable());
         pack();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    private static JLabel createLabel(String initialText) {
-        JLabel label = new JLabel(initialText);
-        label.setName(SNIPER_STATUS_NAME);
-        label.setBorder(new LineBorder(Color.BLACK));
-        return label;
+    private void fillContentPane(JTable snipersTable) {
+        final Container contentPane = getContentPane();
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(new JScrollPane(snipersTable), BorderLayout.NORTH);
     }
 
-    public void showStatus(String status) {
-        sniperStatus.setText(status);
+    private JTable makeSnipersTable() {
+        snipers = new SnipersTableModel();
+        JTable snipersTable = new JTable(snipers);
+        snipersTable.setName(SNIPERS_TABLE_NAME);
+        return snipersTable;
+    }
+
+    public void sniperStateChanged(SniperSnapshot sniperSnapshot) {
+        snipers.sniperStateChanged(sniperSnapshot);
     }
 }

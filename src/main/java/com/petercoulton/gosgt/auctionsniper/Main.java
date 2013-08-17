@@ -24,7 +24,9 @@ public class Main {
     public static final String BID_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: BID; Price: %d;";
     public static final String JOIN_COMMAND_FORMAT  = "SOLVersion: 1.1; Command: JOIN";
 
-    public MainWindow ui;
+    private final SnipersTableModel snipers = new SnipersTableModel();
+
+    private MainWindow ui;
 
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private Chat notToBeGCd;
@@ -51,7 +53,7 @@ public class Main {
 
         chat.addMessageListener(new AuctionMessageTranslator(
                 connection.getUser(),
-                new AuctionSniper(auction, new SniperStatusDisplayer())));
+                new AuctionSniper(itemID, auction, new SwingThreadSniperStatusDisplayer(snipers))));
 
         auction.join();
     }
@@ -85,32 +87,24 @@ public class Main {
         });
     }
 
-    public class SniperStatusDisplayer implements ISniperListener {
-        @Override
-        public void sniperBidding() {
-            showStatus(MainWindow.STATUS_BIDDING);
+    public class SwingThreadSniperStatusDisplayer implements SniperListener {
+        private final SnipersTableModel snipers;
+
+        public SwingThreadSniperStatusDisplayer(SnipersTableModel snipers) {
+            this.snipers = snipers;
         }
 
         @Override
-        public void sniperWinning() {
-            showStatus(MainWindow.STATUS_WINNING);
+        public void sniperStateChanged(final SniperSnapshot snapshot) {
+            updateUI(snapshot);
+            snipers.sniperStateChanged(snapshot);
         }
 
-        @Override
-        public void sniperWon() {
-            showStatus(MainWindow.STATUS_WON);
-        }
-
-        @Override
-        public void sniperLost() {
-            showStatus(MainWindow.STATUS_LOST);
-        }
-
-        private void showStatus(final String status) {
+        private void updateUI(final SniperSnapshot snapshot) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    ui.showStatus(status);
+                    ui.sniperStateChanged(snapshot);
                 }
             });
         }

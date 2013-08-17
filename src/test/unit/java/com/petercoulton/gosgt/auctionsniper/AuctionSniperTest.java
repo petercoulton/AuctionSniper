@@ -7,20 +7,21 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static com.petercoulton.gosgt.auctionsniper.IAuctionEventListener.PriceSource;
+import static com.petercoulton.gosgt.auctionsniper.AuctionEventListener.PriceSource;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuctionSniperTest {
 
-    @Mock private ISniperListener listener;
+    public static final String ITEM_ID = "item-54321";
+    @Mock private SniperListener listener;
     @Mock private Auction auction;
 
     private AuctionSniper sniper;
 
     @Before
     public void setUp() throws Exception {
-        sniper = new AuctionSniper(auction, listener);
+        sniper = new AuctionSniper(ITEM_ID, auction, listener);
     }
 
     @Test public void
@@ -30,7 +31,7 @@ public class AuctionSniperTest {
         sniper.auctionClosed();
 
         // Assert
-        verify(listener).sniperLost();
+        verify(listener).sniperStateChanged(new SniperSnapshot(ITEM_ID, 0, 0, SniperState.LOST));
     }
 
     @Test public void
@@ -38,15 +39,16 @@ public class AuctionSniperTest {
         // Arrange
         final int price = 1001;
         final int increment = 25;
+        final int bid = price + increment;
 
         // Act
         sniper.currentPrice(price, increment, PriceSource.FromOtherBidder);
         sniper.auctionClosed();
 
         // Assert
-        verify(auction).bid(price + increment);
-        verify(listener).sniperBidding();
-        verify(listener).sniperLost();
+        verify(auction).bid(bid);
+        verify(listener).sniperStateChanged(new SniperSnapshot(ITEM_ID, price, bid, SniperState.BIDDING));
+        verify(listener).sniperStateChanged(new SniperSnapshot(ITEM_ID, price, bid, SniperState.LOST));
     }
 
     @Test public void
@@ -54,26 +56,25 @@ public class AuctionSniperTest {
         // Arrange
         final int price = 1001;
         final int increment = 25;
+        final int bid = price + increment;
 
         // Act
         sniper.currentPrice(price, increment, PriceSource.FromOtherBidder);
 
         // Assert
-        verify(auction).bid(price + increment);
-        verify(listener).sniperBidding();
+        verify(auction).bid(bid);
+        verify(listener).sniperStateChanged(new SniperSnapshot(ITEM_ID, price, bid, SniperState.BIDDING));
     }
 
     @Test public void
     should_report_sniper_is_winning_when_current_price_comes_from_sniper() throws Exception {
         // Arrange
-        final int price = 1001;
-        final int increment = 25;
-
         // Act
-        sniper.currentPrice(price, increment, PriceSource.FromSniper);
+        sniper.currentPrice(123, 12, PriceSource.FromOtherBidder);
+        sniper.currentPrice(135, 45, PriceSource.FromSniper);
 
         // Assert
-        verify(listener).sniperWinning();
+        verify(listener).sniperStateChanged(new SniperSnapshot(ITEM_ID, 135, 135, SniperState.WINNING));
     }
 
     @Test public void
@@ -84,7 +85,6 @@ public class AuctionSniperTest {
         sniper.auctionClosed();
 
         // Assert
-        verify(listener).sniperWinning();
-        verify(listener).sniperWon();
+        verify(listener).sniperStateChanged(new SniperSnapshot(ITEM_ID, 1001, 0, SniperState.WON));
     }
 }
