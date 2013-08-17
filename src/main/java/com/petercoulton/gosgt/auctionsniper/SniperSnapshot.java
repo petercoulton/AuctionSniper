@@ -6,14 +6,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class SniperSnapshot {
     public final String itemID;
-    public final int price;
-    public final int bid;
+    public final int lastPrice;
+    public final int lastBid;
     public final SniperState state;
 
-    public SniperSnapshot(String itemID, int price, int bid, SniperState state) {
+    public SniperSnapshot(String itemID, int lastPrice, int lastBid, SniperState state) {
         this.itemID = itemID;
-        this.price = price;
-        this.bid = bid;
+        this.lastPrice = lastPrice;
+        this.lastBid = lastBid;
         this.state = state;
     }
 
@@ -22,7 +22,7 @@ public class SniperSnapshot {
     }
 
     public SniperSnapshot winning(int price) {
-        return new SniperSnapshot(itemID, price, bid, SniperState.WINNING);
+        return new SniperSnapshot(itemID, price, lastBid, SniperState.WINNING);
     }
 
     public SniperSnapshot bidding(int price, int bid) {
@@ -30,7 +30,7 @@ public class SniperSnapshot {
     }
 
     public SniperSnapshot closed() {
-        return new SniperSnapshot(itemID, price, bid, state.whenAuctionClosed());
+        return new SniperSnapshot(itemID, lastPrice, lastBid, state.whenAuctionClosed());
     }
 
     @Override

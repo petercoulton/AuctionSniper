@@ -19,12 +19,25 @@ public class SnipersTableModelTest {
         final SnipersTableModel model = new SnipersTableModel();
 
         // Act
-        model.sniperStatusChanged(new SniperSnapshot("item-12345", 132, 12, SniperState.BIDDING));
+        model.sniperStateChanged(new SniperSnapshot("item-12345", 132, 12, SniperState.BIDDING));
 
         // Assert
         assertThat(model.getValueAt(0, Column.ITEM_IDENTIFIER.ordinal()), is((Object)"item-12345"));
         assertThat(model.getValueAt(0, Column.LAST_PRICE.ordinal()), is((Object)132));
         assertThat(model.getValueAt(0, Column.LAST_BID.ordinal()), is((Object)12));
         assertThat(model.getValueAt(0, Column.SNIPER_STATUS.ordinal()), is((Object)MainWindow.STATUS_BIDDING));
+    }
+
+    @Test
+    public void
+    should_set_column_headings() throws Exception {
+        // Arrange
+        final SnipersTableModel model = new SnipersTableModel();
+
+        // Act
+        // Assert
+        for (Column column : Column.values()) {
+            assertThat(model.getColumnName(column.ordinal()), is(column.name));
+        }
     }
 }

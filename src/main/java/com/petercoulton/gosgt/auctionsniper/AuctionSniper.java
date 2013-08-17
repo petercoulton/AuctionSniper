@@ -2,17 +2,12 @@ package com.petercoulton.gosgt.auctionsniper;
 
 
 public class AuctionSniper implements AuctionEventListener {
-
-    private boolean isWinning = false;
-
-    private final String itemID;
     private final Auction auction;
     private final SniperListener listener;
 
     private SniperSnapshot snapshot;
 
     public AuctionSniper(String itemID, Auction auction, SniperListener listener) {
-        this.itemID = itemID;
         this.auction = auction;
         this.listener = listener;
         this.snapshot = SniperSnapshot.joining(itemID);

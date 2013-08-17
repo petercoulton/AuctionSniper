@@ -16,7 +16,7 @@ public class ApplicationRunner {
             @Override
             public void run() {
                 try {
-                    Main.main(XMPP_HOSTNAME, SNIPER_USERNAME, SNIPER_PASSWORD, auction.getItemID());
+                    Main.main(XMPP_HOSTNAME, SNIPER_USERNAME, SNIPER_PASSWORD, itemID);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -25,7 +25,9 @@ public class ApplicationRunner {
         thread.setDaemon(true);
         thread.start();
         driver = new AuctionSniperDriver(1000);
-        driver.showsSniperStatus(MainWindow.STATUS_JOINING);
+        driver.hasTitle(MainWindow.APPLICATION_TITLE);
+        driver.hasColumnTitles();
+        driver.showsSniperStatus("", 0, 0, MainWindow.STATUS_JOINING);
     }
 
     public void hasShownSniperItBidding(int lastPrice, int lastBid) {
