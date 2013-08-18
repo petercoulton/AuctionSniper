@@ -17,8 +17,9 @@ public class MainWindow extends JFrame {
 
     private SnipersTableModel snipers;
 
-    public MainWindow() {
+    public MainWindow(SnipersTableModel snipers) {
         super(APPLICATION_TITLE);
+        this.snipers = snipers;
         setName(MAIN_WINDOW_NAME);
         fillContentPane(makeSnipersTable());
         pack();
@@ -33,7 +34,6 @@ public class MainWindow extends JFrame {
     }
 
     private JTable makeSnipersTable() {
-        snipers = new SnipersTableModel();
         JTable snipersTable = new JTable(snipers);
         snipersTable.setName(SNIPERS_TABLE_NAME);
         return snipersTable;

@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.String.format;
 
@@ -29,7 +31,7 @@ public class Main {
     private MainWindow ui;
 
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
-    private Chat notToBeGCd;
+    private List<Chat> notToBeGCd = new ArrayList<>();
 
     public Main() throws InvocationTargetException, InterruptedException {
         startUserInterface();
@@ -37,17 +39,18 @@ public class Main {
 
     public static void main(String... args) throws InvocationTargetException, InterruptedException, XMPPException {
         Main main = new Main();
-        String userID = args[ARG_USERNAME];
-        main.joinAuction(
-                connectTo(args[ARG_HOSTNAME], userID, args[ARG_PASSWORD]),
-                args[ARG_ITEM_ID]);
+        XMPPConnection connection = connectTo(args[ARG_HOSTNAME], args[ARG_USERNAME], args[ARG_PASSWORD]);
+        main.disconnectWhenUICloses(connection);
+
+        for (int i=3; i<args.length; i++) {
+            main.joinAuction(connection, args[i]);
+        }
     }
 
     private void joinAuction(final XMPPConnection connection, String itemID) throws XMPPException {
-        disconnectWhenUICloses(connection);
-
         final Chat chat = connection.getChatManager().createChat(auctionID(itemID, connection), null);
-        this.notToBeGCd = chat;
+
+        notToBeGCd.add(chat);
 
         Auction auction = new XMPPAuction(chat);
 
@@ -82,7 +85,7 @@ public class Main {
         SwingUtilities.invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                ui = new MainWindow();
+                ui = new MainWindow(snipers);
             }
         });
     }
